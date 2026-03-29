@@ -6,15 +6,26 @@ from PIL import Image
 # --- 0. API SETUP ---
 # Grabbing your key securely from Streamlit's secret vault
 # This looks for the key, but won't crash the app if it can't find it!
+import streamlit as st
+import os
+
+# 1. Try to get the key from Streamlit's secrets first
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", None)
 
-if GEMINI_API_KEY is None:
-    st.error("⚠️ I couldn't find your GEMINI_API_KEY in the Streamlit Secrets!")
-    st.info("Please add it to your app settings on the Streamlit Cloud dashboard.")
-    st.stop() # This stops the app gracefully instead of showing a red crash screen
-
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-2.5-flash')
+# 2. If it's missing, don't crash! Let the user type it in manually.
+if not GEMINI_API_KEY:
+    st.warning("⚠️ Streamlit couldn't find your GEMINI_API_KEY in its settings.")
+    
+    # This creates a secure password-style text input on your app's sidebar
+    GEMINI_API_KEY = st.sidebar.text_input(
+        "Enter your Gemini API Key to unlock the app:", 
+        type="password"
+    )
+    
+    # Stop the rest of the app from running until they give a key
+    if not GEMINI_API_KEY:
+        st.info("👈 Please enter your API key in the sidebar to continue.")
+        st.stop()
 
 # --- 1. SETTING THE MOOD ---
 st.set_page_config(page_title="Corporate Strategy Hub", layout="centered")
