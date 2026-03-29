@@ -5,7 +5,13 @@ from PIL import Image
 
 # --- 0. API SETUP ---
 # Grabbing your key securely from Streamlit's secret vault
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+# This looks for the key, but won't crash the app if it can't find it!
+GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", None)
+
+if GEMINI_API_KEY is None:
+    st.error("⚠️ I couldn't find your GEMINI_API_KEY in the Streamlit Secrets!")
+    st.info("Please add it to your app settings on the Streamlit Cloud dashboard.")
+    st.stop() # This stops the app gracefully instead of showing a red crash screen
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
